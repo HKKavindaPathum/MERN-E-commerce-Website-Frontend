@@ -1,33 +1,47 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import ProductCard from "../../components/productCard";
 
-export default function ProductPage(){
-    const [products, setProducts] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
+export default function ProductPage() {
+  const { category } = useParams(); // read category from URL
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(
-        ()=>{
-            if(isLoading){
-                axios.get(import.meta.env.VITE_BACKEND_URL + "/api/products").then(
-                    (res)=>{                       
-                        setProducts(res.data)
-                        setIsLoading(false)
-                    }
-                )   
-            }
-        },[isLoading]
-    )
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        let url = import.meta.env.VITE_BACKEND_URL + "/api/products";
+        if (category) {
+          url += `/category/${category}`;
+        }
 
-    return(
-        <div className="w-full h-full flex flex-wrap justify-center items-center">
-            {
-                products.map((product)=>{
-                    return(
-                        <ProductCard key={product.productId} product={product}/>
-                    )
-                })
-            }  
-        </div>
-    )
+        const res = await axios.get(url);
+        setProducts(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [category]);
+
+  if (isLoading) {
+    return <p className="text-center mt-10">Loading...</p>;
+  }
+
+  return (
+    <div className="w-full bg-pink-50 flex flex-wrap justify-center items-center pt-10">
+      {products.length > 0 ? (
+        products.map((product) => (
+          <ProductCard key={product.productId} product={product} />
+        ))
+      ) : (
+        <p className="text-center text-pink-900">No products found.</p>
+      )}
+    </div>
+  );
 }

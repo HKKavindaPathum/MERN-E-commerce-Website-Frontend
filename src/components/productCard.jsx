@@ -2,14 +2,15 @@ import { Link } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   return (
-    <Link to={"/overview/"+product.productId} className="w-[300px] h-[450px] bg-white shadow-lg rounded-lg m-4 overflow-hidden flex flex-col border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+    <Link to={"/overview/"+product.productId} 
+    className="w-[300px] h-[400px] bg-pink-100 shadow-md rounded-2xl m-4 overflow-hidden flex flex-col border-3 border-yellow-600 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
       {/* Image */}
-      <div className="h-[200px] w-full bg-gray-100 flex items-center justify-center">
+      <div className="h-[200px] w-full bg-gray-50 flex items-center justify-center overflow-hidden">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
             alt={product.name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <span className="text-gray-400">No Image</span>

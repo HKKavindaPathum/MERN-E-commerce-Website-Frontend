@@ -5,158 +5,186 @@ import mediaUpload from "../../utils/mediaUpload";
 import axios from "axios";
 
 export default function EditProductPage() {
-    const location = useLocation()
-	const [productId, setProductId] = useState(location.state.productId);
-	const [name, setName] = useState(location.state.name);
-	const [altNames, setAltNames] = useState(location.state.altNames.join(","));
-	const [description, setDescription] = useState(location.state.description);
-	const [images, setImages] = useState([]);
-	const [labelledPrice, setLabelledPrice] = useState(location.state.labelledPrice);
-	const [price, setPrice] = useState(location.state.price);
-	const [stock, setStock] = useState(location.state.stock);
-    const navigate = useNavigate()
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    console.log(location)
+  const [productId] = useState(location.state.productId); // keep readonly
+  const [name, setName] = useState(location.state.name);
+  const [altNames, setAltNames] = useState(location.state.altNames.join(","));
+  const [description, setDescription] = useState(location.state.description);
+  const [images, setImages] = useState([]);
+  const [category, setCategory] = useState(location.state.category);
+  const [labelledPrice, setLabelledPrice] = useState(location.state.labelledPrice);
+  const [price, setPrice] = useState(location.state.price);
+  const [stock, setStock] = useState(location.state.stock);
 
-	async function updateProduct() {
+  async function updateProduct(e) {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
 
-        const token = localStorage.getItem("token")
-        if(token == null){
-            toast.error("Please login first")
-            return
-        }
+    let imageUrls = location.state.images;
+    if (images.length > 0) {
+      const promisesArray = Array.from(images).map((img) => mediaUpload(img));
+      imageUrls = await Promise.all(promisesArray);
+    }
 
-		let imageUrls = location.state.images;
+    const product = {
+      productId,
+      name,
+      altNames: altNames.split(","),
+      description,
+      images: imageUrls,
+      category, 
+      labelledPrice,
+      price,
+      stock,
+    };
 
-		const promisesArray = [];
+    try {
+      await axios.put(import.meta.env.VITE_BACKEND_URL + "/api/products/" + productId, product, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      toast.success("Product updated successfully");
+      navigate("/admin/products");
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Error updating product");
+    }
+  }
 
-		for (let i = 0; i < images.length; i++) {
-			promisesArray[i] = mediaUpload(images[i]);
-		}
-		try {
-            if(images.length > 0){
-                imageUrls = await Promise.all(promisesArray);
-            }
-		    
-			console.log(imageUrls);
+  return (
+    <div className="flex justify-center items-center h-full p-6 font-[var(--font-main)] bg-gray-50">
+      <form
+        onSubmit={updateProduct}
+        className="w-full max-w-md bg-white shadow-lg rounded-lg p-6 space-y-4 border"
+      >
+        <h2 className="text-2xl font-bold text-center text-[var(--color-accent)]">
+          Edit Product
+        </h2>
 
-            const altNamesArray = altNames.split(",")
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Product ID (readonly) */}
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-700 font-medium">Product ID</label>
+            <input
+              type="text"
+              disabled
+              className="input input-bordered w-full border p-2 rounded-lg bg-gray-100 cursor-not-allowed"
+              value={productId}
+            />
+          </div>
 
-            const product = {
-                productId : productId,
-                name : name,
-                altNames : altNamesArray,
-                description : description,
-                images : imageUrls,
-                labelledPrice : labelledPrice,
-                price : price,
-                stock : stock,
-            }
-            axios.put(import.meta.env.VITE_BACKEND_URL + "/api/products/"+productId, product , {
-                headers : {
-                    "Authorization" : "Bearer "+token
-                }
-            }).then(() => {
-                toast.success("Product updated successfully")
-                navigate("/admin/products")
-            }).catch((e) => {
-                toast.error(e.response.data.message)
-            })
+          {/* Name */}
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-700 font-medium">Name</label>
+            <input
+              type="text"
+              className="input input-bordered w-full border p-2 rounded-lg"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-		} catch (e) {
-			console.log(e);
-		}
-	}
-	return (
-		<div className="w-full h-full flex flex-col justify-center items-center">
-            <h1 className="text-3xl font-bold mb-4">Edit Product</h1>
-			<input
-				type="text"
-                disabled
-				placeholder="Product ID"
-				className="input input-bordered w-full max-w-xs"
-				value={productId}
-				onChange={(e) => {
-					setProductId(e.target.value);
-				}}
-			/>
-			<input
-				type="text"
-				placeholder="Name"
-				className="input input-bordered w-full max-w-xs"
-				value={name}
-				onChange={(e) => {
-					setName(e.target.value);
-				}}
-			/>
-			<input
-				type="text"
-				placeholder="Alt Names"
-				className="input input-bordered w-full max-w-xs"
-				value={altNames}
-				onChange={(e) => {
-					setAltNames(e.target.value);
-				}}
-			/>
-			<input
-				type="text"
-				placeholder="Description"
-				className="input input-bordered w-full max-w-xs"
-				value={description}
-				onChange={(e) => {
-					setDescription(e.target.value);
-				}}
-			/>
-			<input
-				type="file"
-				placeholder="Images"
-				multiple
-				className="input input-bordered w-full max-w-xs"
-				onChange={(e) => {
-					setImages(e.target.files);
-				}}
-			/>
-			<input
-				type="number"
-				placeholder="Labelled Price"
-				className="input input-bordered w-full max-w-xs"
-				value={labelledPrice}
-				onChange={(e) => {
-					setLabelledPrice(e.target.value);
-				}}
-			/>
-			<input
-				type="number"
-				placeholder="Price"
-				className="input input-bordered w-full max-w-xs"
-				value={price}
-				onChange={(e) => {
-					setPrice(e.target.value);
-				}}
-			/>
-			<input
-				type="number"
-				placeholder="Stock"
-				className="input input-bordered w-full max-w-xs"
-				value={stock}
-				onChange={(e) => {
-					setStock(e.target.value);
-				}}
-			/>
-			<div className="w-full flex justify-center flex-row items-center mt-4">
-				<Link
-					to="/admin/products"
-					className="bg-red-500 text-white font-bold py-2 px-4 rounded mr-4"
-				>
-					Cancel
-				</Link>
-				<button
-					className="bg-green-500 text-white font-bold py-2 px-4 rounded"
-					onClick={updateProduct}
-				>
-					Update Product
-				</button>
-			</div>
-		</div>
-	);
+          {/* Alt Names */}
+          <div className="flex flex-col gap-2 col-span-2">
+            <label className="text-gray-700 font-medium">Alternative Names</label>
+            <input
+              type="text"
+              className="input input-bordered w-full border p-2 rounded-lg"
+              value={altNames}
+              onChange={(e) => setAltNames(e.target.value)}
+            />
+          </div>
+
+          {/* Description */}
+          <div className="flex flex-col gap-2 col-span-2">
+            <label className="text-gray-700 font-medium">Description</label>
+            <textarea
+              className="textarea textarea-bordered w-full border p-2 rounded-lg"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          {/* Images */}
+          <div className="flex flex-col gap-2 col-span-2">
+            <label className="text-gray-700 font-medium">Upload Images</label>
+            <input
+              type="file"
+              multiple
+              className="file-input file-input-bordered w-full border p-2 rounded-lg bg-gray-300 cursor-pointer"
+              onChange={(e) => setImages(e.target.files)}
+            />
+          </div>
+
+          {/* Category */}
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-700 font-medium">Category</label>
+            <select
+              className="select select-bordered w-full border p-2 rounded-lg"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="skincare">Skincare</option>
+              <option value="makeup">Makeup</option>
+              <option value="haircare">Haircare</option>
+            </select>
+          </div>
+
+
+          {/* Labelled Price */}
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-700 font-medium">Labelled Price</label>
+            <input
+              type="number"
+              className="input input-bordered w-full border p-2 rounded-lg"
+              value={labelledPrice}
+              onChange={(e) => setLabelledPrice(e.target.value)}
+            />
+          </div>
+
+          {/* Selling Price */}
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-700 font-medium">Selling Price</label>
+            <input
+              type="number"
+              className="input input-bordered w-full border p-2 rounded-lg"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </div>
+
+          {/* Stock Quantity */}
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-700 font-medium">Stock Quantity</label>
+            <input
+              type="number"
+              className="input input-bordered w-full border p-2 rounded-lg"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-between gap-4">
+          <Link
+            to="/admin/products"
+            className="w-1/2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition text-center"
+          >
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            className="w-1/2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition"
+          >
+            Update Product
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }

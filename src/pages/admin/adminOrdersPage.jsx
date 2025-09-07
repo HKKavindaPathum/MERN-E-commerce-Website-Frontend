@@ -196,7 +196,7 @@ export default function AdminOrdersPage() {
 		 								))}
 		 							</tbody>
 		 						</table>
-		 						<div className="flex justify-end">
+		 						<div className="flex justify-end gap-4">
 		 							<button
 		 								onClick={() => setIsModalOpen(false)}
 		 								className="mt-4 px-4 py-2 bg-[var(--color-accent)] text-white rounded hover:bg-[var(--color-secondary)] transition"
@@ -214,59 +214,36 @@ export default function AdminOrdersPage() {
 		 				)}
 		 			</Modal>
 
-					<table className="w-full text-center border border-gray-200 shadow-md rounded-lg overflow-hidden">
-						<thead className="bg-[var(--color-accent)] text-white">
-							<tr>
-								<th className="py-3 px-2">Order ID</th>
-								<th className="py-3 px-2">Name</th>
-								<th className="py-3 px-2">Email</th>
-								<th className="py-3 px-2">Phone</th>
-								<th className="py-3 px-2">Total (Rs)</th>
-								<th className="py-3 px-2">Date</th>
-								<th className="py-3 px-2">Status</th>
-							</tr>
+					<table className="w-full text-sm text-gray-700 border border-gray-200 shadow-md rounded-2xl overflow-hidden">
+						<thead className="bg-[var(--color-accent)] text-white text-base">
+						<tr>
+							<th className="py-4 px-3 text-left">Order ID</th>
+							<th className="py-4 px-3 text-left">Name</th>
+							<th className="py-4 px-3 text-left">Email</th>
+							<th className="py-4 px-3 text-left">Phone</th>
+							<th className="py-4 px-3 text-left">Total (LKR)</th>
+							<th className="py-4 px-3 text-left">Date</th>
+							<th className="py-4 px-3 text-left">Status</th>
+						</tr>
 						</thead>
 						<tbody>
-							{orders.map((order, index) => (
-								<tr
-									key={index}
-									onClick={() => {
-										setActiveOrder(order);
-										setIsModalOpen(true);
-									}}
-									className={`cursor-pointer ${
-										index % 2 === 0
-											? "bg-[var(--color-primary)]"
-											: "bg-gray-100"
-									} hover:bg-gray-200 transition`}
-								>
-									<td className="py-2 px-2">{order.orderId}</td>
-									<td className="py-2 px-2">{order.name}</td>
-									<td className="py-2 px-2">{order.email}</td>
-									<td className="py-2 px-2">{order.phone}</td>
-									<td className="py-2 px-2">
-										{order.total.toLocaleString("en-LK", {
-											style: "currency",
-											currency: "LKR",
-										})}
-									</td>
-									<td className="py-2 px-2">
-										{new Date(order.date).toLocaleDateString("en-GB")}
-									</td>
-									<td
-										className={`py-2 px-2 font-semibold ${
-											order.status === "pending"
-												? "text-yellow-500"
-												: order.status === "completed"
-												? "text-green-600"
-												: "text-red-500"
-										}`}
-									>
-										{order.status.charAt(0).toUpperCase() +
-											order.status.slice(1)}
-									</td>
-								</tr>
-							))}
+						{orders.map((order, index) => (
+							<tr
+							key={index}
+							onClick={() => { setActiveOrder(order); setIsModalOpen(true); }}
+							className={`cursor-pointer ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100 transition`}
+							>
+							<td className="py-2 px-3">{order.orderId}</td>
+							<td className="py-2 px-3">{order.name}</td>
+							<td className="py-2 px-3">{order.email}</td>
+							<td className="py-2 px-3">{order.phone}</td>
+							<td className="py-2 px-3 text-left">{order.total.toLocaleString("en-LK", { style: "currency", currency: "LKR" })}</td>
+							<td className="py-2 px-3">{new Date(order.date).toLocaleDateString("en-GB")}</td>
+							<td className={`py-2 px-3 font-semibold ${order.status === "pending" ? "text-yellow-500" : order.status === "completed" ? "text-green-600" : "text-red-500"}`}>
+								{order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+							</td>
+							</tr>
+						))}
 						</tbody>
 					</table>
 		 		</div>
