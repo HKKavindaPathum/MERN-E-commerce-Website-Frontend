@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ImageSlider from "../../components/imageSlider";
 import Loading from "../../components/loading";
 import { addToCart, getCart } from "../../utils/cart";
+import ProductReviews from "../../components/ProductReviews";//see
 
 export default function ProductOverviewPage() {
 	const params = useParams();
@@ -88,6 +89,7 @@ export default function ProductOverviewPage() {
 										addToCart(product, 1);
 										console.log("New cart");
 										console.log(getCart());
+										toast.success("Product added to cart");
 									}}
 								>
 									Add to Cart
@@ -113,6 +115,9 @@ export default function ProductOverviewPage() {
 								>
 									Buy Now
 								</button>
+							</div>
+							<div className="w-3/4 pb-4 lg:w-full">
+								<ProductReviews productId={productId} />
 							</div>
 						</div>
                     </div>  
